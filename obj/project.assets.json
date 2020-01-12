@@ -1,0 +1,108 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "Tmds.LibC/0.3.0": {
+        "type": "package",
+        "compile": {
+          "ref/netstandard2.0/Tmds.LibC.dll": {}
+        },
+        "runtimeTargets": {
+          "runtimes/linux-arm/lib/netstandard2.0/Tmds.LibC.dll": {
+            "assetType": "runtime",
+            "rid": "linux-arm"
+          },
+          "runtimes/linux-arm64/lib/netstandard2.0/Tmds.LibC.dll": {
+            "assetType": "runtime",
+            "rid": "linux-arm64"
+          },
+          "runtimes/linux-x64/lib/netstandard2.0/Tmds.LibC.dll": {
+            "assetType": "runtime",
+            "rid": "linux-x64"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Tmds.LibC/0.3.0": {
+      "sha512": "Z+aT6qZ4hVyeGL/VgAuL7TLQXxGJog70VlaqqeztyM9TAf3wBvYcjs3sBnirABGlIEZKzl3bg5UQdqrHPiQPnw==",
+      "type": "package",
+      "path": "tmds.libc/0.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ref/netstandard2.0/Tmds.LibC.dll",
+        "runtimes/linux-arm/lib/netstandard2.0/Tmds.LibC.dll",
+        "runtimes/linux-arm64/lib/netstandard2.0/Tmds.LibC.dll",
+        "runtimes/linux-x64/lib/netstandard2.0/Tmds.LibC.dll",
+        "tmds.libc.0.3.0.nupkg.sha512",
+        "tmds.libc.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETCoreApp,Version=v3.1": [
+      "Tmds.LibC >= 0.3.0"
+    ]
+  },
+  "packageFolders": {
+    "/home/giulio/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/home/giulio/src/github.com/dullgiulio/container-csharp/container-csharp.csproj",
+      "projectName": "container-csharp",
+      "projectPath": "/home/giulio/src/github.com/dullgiulio/container-csharp/container-csharp.csproj",
+      "packagesPath": "/home/giulio/.nuget/packages/",
+      "outputPath": "/home/giulio/src/github.com/dullgiulio/container-csharp/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/home/giulio/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "netcoreapp3.1"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "netcoreapp3.1": {
+        "dependencies": {
+          "Tmds.LibC": {
+            "target": "Package",
+            "version": "[0.3.0, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/3.1.100/RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
