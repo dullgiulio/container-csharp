@@ -48,11 +48,11 @@ namespace container
         private unsafe void Run()
         {
             int stackSize = 1024 * 1024;
-            byte* stackBuf = stackalloc byte[stackSize]; // TODO: make a span?
+            byte* stackBuf = stackalloc byte[stackSize];
             int ret = clone(
                 (void *)Marshal.GetFunctionPointerForDelegate<execChild>(ExecChild),
-                (void *)(stackBuf+stackSize), // stack grows donwards
-                CLONE_NEWNS|CLONE_NEWUTS|CLONE_NEWPID,
+                (void *)(stackBuf+stackSize), // stack grows downwards
+                0 /*CLONE_NEWNS|CLONE_NEWUTS|CLONE_NEWPID*/,
                 null);
             if (ret < 0)
             {
@@ -78,12 +78,13 @@ namespace container
 
         private unsafe void ChrootHome()
         {
+            /*
             string homePath = Environment.GetEnvironmentVariable("HOME") ?? "/tmp";
             int byteLength = Encoding.UTF8.GetByteCount(homePath) + 1;
             Span<byte> bytes = byteLength <= 128 ? stackalloc byte[byteLength] : new byte[byteLength];
             Encoding.UTF8.GetBytes(homePath, bytes);
 
-            fixed (byte* path = bytes)
+            fixed (byte* path = CString(homePath))
             {
                 int ret = chroot(path);
                 if (ret < 0)
@@ -91,25 +92,69 @@ namespace container
                     PlatformException.Throw();
                 }
             }
+            */
+        }
+
+        private unsafe void Mount()
+        {
+            // TODO
         }
 
         private unsafe int ExecChild(void *unused)
         {
-            SetHostname("test-container");
-            ChrootHome();
-            Directory.SetCurrentDirectory("/");
+            // SetHostname("test-container");
+            // ChrootHome();
+            // Directory.SetCurrentDirectory("/");
             
             // mount proc
+            /*
             int ret = unshare(CLONE_NEWNS);
             if (ret < 0)
             {
                 PlatformException.Throw();
             }
+            */
             // TODO: execve
-            //Console.WriteLine(String.Format("{0}", childArgs[1..]));
+            Console.WriteLine(String.Format("{0}", childArgs[1..]));
+            Execve(childArgs[1], childArgs[2..]);
             return 0;
         }
-       
+
+        private unsafe void Execve(string path, string[] args)
+        {
+            fixed (byte* _path = CString(path).Span)
+            {
+                byte*[] _args = new byte*[args.Length+2]; // leave the last element to NULL
+                _args[0] = _path;
+                for (var i = 0; i < args.Length; i++)
+                {
+                    fixed(byte* arg = CString(args[i]).Span)
+                    {
+                        _args[i+1] = arg;
+                    }
+                }
+                byte*[] env = { null }; // TODO: inherit env?
+                
+                fixed (byte **argv = _args)
+                fixed (byte **environ = env)
+                {
+                    if (execve(_path, argv, environ) < 0)
+                    {
+                        PlatformException.Throw();
+                    }
+                }
+
+            }
+        }
+      
+        private Memory<byte> CString(string str)
+        {
+            int byteLength = Encoding.UTF8.GetByteCount(str) + 1;
+            byte[] bytes = new byte[byteLength];
+            Encoding.UTF8.GetBytes(str, bytes);
+            return new Memory<byte>(bytes);
+        }
+
         private void CGroup(string name)
         {
             var basepath = Path.Join("/sys/fs/cgroup/pids", name);
