@@ -13,6 +13,7 @@ namespace container
     class Program
     {
         private string[] childArgs;
+
         unsafe private delegate int execChild(void *unused);
 
         static void Main(string[] args)
@@ -42,28 +43,34 @@ namespace container
 
         private void Child()
         {
-            Console.WriteLine("child");
+            Execve(childArgs[1], childArgs[2..]);
         }
 
         private unsafe void Run()
         {
             int stackSize = 1024 * 1024;
-            byte* stackBuf = stackalloc byte[stackSize];
-            int ret = clone(
-                (void *)Marshal.GetFunctionPointerForDelegate<execChild>(ExecChild),
-                (void *)(stackBuf+stackSize), // stack grows downwards
-                0 /*CLONE_NEWNS|CLONE_NEWUTS|CLONE_NEWPID*/,
-                null);
-            if (ret < 0)
+            Span<byte> stackBuf = stackalloc byte[stackSize];
+            fixed (byte* stack = stackBuf)
             {
-                PlatformException.Throw();
+                int childPid = clone(
+                    (void *)Marshal.GetFunctionPointerForDelegate<execChild>(ExecChild),
+                    (void *)(stack+stackSize), // stack grows downwards
+                    SIGCHLD /* |CLONE_NEWNS|CLONE_NEWUTS|CLONE_NEWPID */,
+                    null);
+                if (childPid < 0)
+                {
+                    PlatformException.Throw();
+                }
+                // wait for child to exit
+                // TODO: this is somehow not working, maybe because of clone()
+                Process.GetProcessById(childPid).WaitForExit();
             }
         }
 
         private unsafe void SetHostname(string hostname)
         {
-            int byteLength = Encoding.UTF8.GetByteCount(hostname) + 1;
-            Span<byte> bytes = byteLength <= 128 ? stackalloc byte[byteLength] : new byte[byteLength];
+            int byteLength = Encoding.UTF8.GetByteCount(hostname);
+            Span<byte> bytes = stackalloc byte[byteLength];
             Encoding.UTF8.GetBytes(hostname, bytes);
 
             fixed (byte* host = bytes)
@@ -76,15 +83,9 @@ namespace container
             }
         }
 
-        private unsafe void ChrootHome()
+        private unsafe void Chroot(string root)
         {
-            /*
-            string homePath = Environment.GetEnvironmentVariable("HOME") ?? "/tmp";
-            int byteLength = Encoding.UTF8.GetByteCount(homePath) + 1;
-            Span<byte> bytes = byteLength <= 128 ? stackalloc byte[byteLength] : new byte[byteLength];
-            Encoding.UTF8.GetBytes(homePath, bytes);
-
-            fixed (byte* path = CString(homePath))
+            fixed (byte* path = CString(root).Span)
             {
                 int ret = chroot(path);
                 if (ret < 0)
@@ -92,7 +93,6 @@ namespace container
                     PlatformException.Throw();
                 }
             }
-            */
         }
 
         private unsafe void Mount()
@@ -102,11 +102,16 @@ namespace container
 
         private unsafe int ExecChild(void *unused)
         {
-            // SetHostname("test-container");
-            // ChrootHome();
-            // Directory.SetCurrentDirectory("/");
+            /*
+            string homePath = Environment.GetEnvironmentVariable("HOME") ?? "/tmp";
             
-            // mount proc
+            SetHostname("test-container");
+            Chroot(homePath);
+            Directory.SetCurrentDirectory("/");
+            */
+
+            // TODO mount /proc
+
             /*
             int ret = unshare(CLONE_NEWNS);
             if (ret < 0)
@@ -114,9 +119,9 @@ namespace container
                 PlatformException.Throw();
             }
             */
-            // TODO: execve
-            Console.WriteLine(String.Format("{0}", childArgs[1..]));
-            Execve(childArgs[1], childArgs[2..]);
+
+            childArgs[0] = "child";
+            Execve("/proc/self/exe", childArgs);
             return 0;
         }
 
@@ -143,7 +148,6 @@ namespace container
                         PlatformException.Throw();
                     }
                 }
-
             }
         }
       
