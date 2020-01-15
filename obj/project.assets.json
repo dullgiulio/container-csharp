@@ -47,19 +47,19 @@
     ]
   },
   "packageFolders": {
-    "/home/giulio/.nuget/packages/": {}
+    "/home/giulio.iotti/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/giulio/src/github.com/dullgiulio/container-csharp/container-csharp.csproj",
+      "projectUniqueName": "/home/giulio.iotti/src/github.com/dullgiulio/container-csharp/container-csharp.csproj",
       "projectName": "container-csharp",
-      "projectPath": "/home/giulio/src/github.com/dullgiulio/container-csharp/container-csharp.csproj",
-      "packagesPath": "/home/giulio/.nuget/packages/",
-      "outputPath": "/home/giulio/src/github.com/dullgiulio/container-csharp/obj/",
+      "projectPath": "/home/giulio.iotti/src/github.com/dullgiulio/container-csharp/container-csharp.csproj",
+      "packagesPath": "/home/giulio.iotti/.nuget/packages/",
+      "outputPath": "/home/giulio.iotti/src/github.com/dullgiulio/container-csharp/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/giulio/.nuget/NuGet/NuGet.Config"
+        "/home/giulio.iotti/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.1"
@@ -101,7 +101,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/3.1.100/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/home/giulio.iotti/dotnet/sdk/3.1.101/RuntimeIdentifierGraph.json"
       }
     }
   }

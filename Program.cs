@@ -21,29 +21,15 @@ namespace container
             var program = new Program(args);
 
             if (args.Length < 1) {
-                Console.WriteLine("Usage: container run <cmd> <arg>...");
+                Console.WriteLine("Usage: container <cmd> <arg>...");
                 return;
             }
-            switch (args[0]) {
-                case "run":
-                    program.Run();
-                    break;
-                case "child":
-                    program.Child();
-                    break;
-                default:
-                    throw new ArgumentException(String.Format("invalid command {0}", args[0]));
-            }
+            program.Run();
         }
 
         Program(string[] args)
         {
             childArgs = args;
-        }
-
-        private void Child()
-        {
-            Execve(childArgs[1], childArgs[2..]);
         }
 
         private unsafe void Run()
@@ -64,7 +50,33 @@ namespace container
                 // wait for child to exit
                 // TODO: this is somehow not working, maybe because of clone()
                 Process.GetProcessById(childPid).WaitForExit();
+                Console.WriteLine("finished waiting for {0}", childPid);
             }
+        }
+
+    	private unsafe int ExecChild(void *unused)
+        {
+            /*
+            string homePath = Environment.GetEnvironmentVariable("HOME") ?? "/tmp";
+            
+            SetHostname("test-container");
+            Chroot(homePath);
+            Directory.SetCurrentDirectory("/");
+            */
+
+            // TODO mount /proc
+
+            /*
+            int ret = unshare(CLONE_NEWNS);
+            if (ret < 0)
+            {
+                PlatformException.Throw();
+            }
+            */
+
+            Console.WriteLine("execve {0}", string.Join(" ", childArgs));
+            Execve(childArgs[0], childArgs[1..]);
+            return 0;
         }
 
         private unsafe void SetHostname(string hostname)
@@ -97,32 +109,14 @@ namespace container
 
         private unsafe void Mount()
         {
-            // TODO
-        }
-
-        private unsafe int ExecChild(void *unused)
-        {
-            /*
-            string homePath = Environment.GetEnvironmentVariable("HOME") ?? "/tmp";
-            
-            SetHostname("test-container");
-            Chroot(homePath);
-            Directory.SetCurrentDirectory("/");
-            */
-
-            // TODO mount /proc
-
-            /*
-            int ret = unshare(CLONE_NEWNS);
-            if (ret < 0)
-            {
-                PlatformException.Throw();
-            }
-            */
-
-            childArgs[0] = "child";
-            Execve("/proc/self/exe", childArgs);
-            return 0;
+    		fixed (byte* proc = CString("proc").Span)
+    		{
+    			if (mount(proc, proc, proc, 0, null) < 0)
+    			{
+    				PlatformException.Throw();
+    			}
+    		}
+    		// TODO: other mounts
         }
 
         private unsafe void Execve(string path, string[] args)
